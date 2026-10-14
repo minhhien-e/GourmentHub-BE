@@ -1,6 +1,6 @@
-﻿using Ecommerce.Abstraction.Services;
+using Ecommerce.Abstraction.Services;
 using Ecommerce.Presentation.Attributes;
-using Ecommerce.Shared.DTOs.OrderDto_s;
+using Ecommerce.Shared.DTOs.Orders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -10,7 +10,7 @@ namespace Ecommerce.Presentation.Controllers
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
-    public class OrderController(IServiceManger manager) : ControllerBase
+    public class OrderController(IServiceManager manager) : ControllerBase
     {
         [HttpPost]
         public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)

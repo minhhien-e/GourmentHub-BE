@@ -1,11 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Domain.Models.Contracts.Repository.GenericReposatory;
 using Ecommerce.Domain.Models.Contracts.Specifications;
 using Ecommerce.Domain.Models.Contracts.UOW;
 using Ecommerce.Domain.Models.Products;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Service.businessServices.ProductServices;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Products;
 using FluentAssertions;
 using Moq;
 

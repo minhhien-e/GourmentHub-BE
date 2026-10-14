@@ -1,8 +1,8 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Domain.Models.Identity;
-using Ecommerce.Shared.DTOs.IdentityDto_s;
+using Ecommerce.Shared.DTOs.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Ecommerce.Service.businessServices
 {
-    public class AuhenticationService(
+    public class AuthenticationService(
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
         IMapper mapper) : IAuthenticationService
@@ -148,7 +148,7 @@ namespace Ecommerce.Service.businessServices
             };
         }
 
-        // ─── Token Factory ────────────────────────────────────────────────
+        // --- Token Factory ------------------------------------------------
 
         private async Task<string> CreateTokenAsync(ApplicationUser user)
         {

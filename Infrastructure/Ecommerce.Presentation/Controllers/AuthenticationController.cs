@@ -1,5 +1,5 @@
-﻿using Ecommerce.Abstraction.Services;
-using Ecommerce.Shared.DTOs.IdentityDto_s;
+using Ecommerce.Abstraction.Services;
+using Ecommerce.Shared.DTOs.Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -11,7 +11,7 @@ namespace Ecommerce.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthenticationController(IServiceManger manager) : ControllerBase
+    public class AuthenticationController(IServiceManager manager) : ControllerBase
     {
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto dto)
@@ -62,7 +62,7 @@ namespace Ecommerce.Presentation.Controllers
             return Ok(updatedAddress);
         }
 
-        // ─── Google OAuth ───────────────────────────────────────────────
+        // --- Google OAuth -----------------------------------------------
 
         /// <summary>
         /// Initiates Google OAuth flow.

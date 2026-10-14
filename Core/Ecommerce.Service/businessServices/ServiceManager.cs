@@ -1,10 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
 using Ecommerce.Domain.Models.Contracts.UOW;
 using Ecommerce.Domain.Models.Identity;
 using Ecommerce.Service.businessServices.CartServices;
-using Ecommerce.Service.businessServices.OrderSevices;
+using Ecommerce.Service.businessServices.OrderServices;
 using Ecommerce.Service.businessServices.PaymentService;
 using Ecommerce.Service.businessServices.ProductServices;
 using Microsoft.AspNetCore.Identity;
@@ -14,14 +14,14 @@ namespace Ecommerce.Service.businessServices
 {
     /// <summary>
     /// Central service manager that lazily initialises all application services.
-    /// Pattern: Controller → ServiceManager → Business Service → UnitOfWork → Repository → Database
+    /// Pattern: Controller ? ServiceManager ? Business Service ? UnitOfWork ? Repository ? Database
     /// </summary>
-    public class ServiceManger(
+    public class ServiceManager(
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ICartRepo cartRepo,
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration) : IServiceManger
+        IConfiguration configuration) : IServiceManager
     {
         private readonly Lazy<IProductService> _lazyProductService =
             new(() => new ProductService(unitOfWork, mapper));
@@ -30,10 +30,10 @@ namespace Ecommerce.Service.businessServices
             new(() => new CartService(cartRepo, mapper));
 
         private readonly Lazy<IAuthenticationService> _lazyAuthService =
-            new(() => new AuhenticationService(userManager, configuration, mapper));
+            new(() => new AuthenticationService(userManager, configuration, mapper));
 
         private readonly Lazy<IOrderService> _lazyOrderService =
-            new(() => new OrderSevice(mapper, cartRepo, unitOfWork));
+            new(() => new OrderService(mapper, cartRepo, unitOfWork));
 
         private readonly Lazy<IPaymentService> _lazyPaymentService =
             new(() => new PaymentService.PaymentService(configuration, cartRepo, unitOfWork, mapper));

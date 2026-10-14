@@ -1,6 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Domain.Models.Orders;
-using Ecommerce.Shared.DTOs.OrderDto_s;
+using Ecommerce.Shared.DTOs.Orders;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

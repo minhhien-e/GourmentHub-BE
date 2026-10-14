@@ -1,5 +1,5 @@
-﻿using Ecommerce.Abstraction.Services;
-using Ecommerce.Shared.DTOs.CartDto_s;
+using Ecommerce.Abstraction.Services;
+using Ecommerce.Shared.DTOs.Cart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ namespace Ecommerce.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PaymentController(IServiceManger manager) : ControllerBase
+    public class PaymentController(IServiceManager manager) : ControllerBase
     {
         [Authorize]
         [HttpPost("{cartId}")]

@@ -1,6 +1,6 @@
-﻿using Ecommerce.Abstraction.Services;
+using Ecommerce.Abstraction.Services;
 using Ecommerce.Presentation.Attributes;
-using Ecommerce.Shared.DTOs.CartDto_s;
+using Ecommerce.Shared.DTOs.Cart;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace Ecommerce.Presentation.Controllers
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
-    public class CartController(IServiceManger manager) : ControllerBase
+    public class CartController(IServiceManager manager) : ControllerBase
     {
         [HttpGet]
         [Cache(100000)]

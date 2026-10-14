@@ -1,6 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Domain.Models.Products;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Products;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Buffers.Text;

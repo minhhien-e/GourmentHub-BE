@@ -1,11 +1,11 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Domain.Models.Cart;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
 using Ecommerce.Domain.Models.Contracts.UOW;
 using Ecommerce.Domain.Models.Orders;
-using Ecommerce.Shared.DTOs.CartDto_s;
+using Ecommerce.Shared.DTOs.Cart;
 using Microsoft.Extensions.Configuration;
 using Stripe;
 using Product = Ecommerce.Domain.Models.Products.Product;

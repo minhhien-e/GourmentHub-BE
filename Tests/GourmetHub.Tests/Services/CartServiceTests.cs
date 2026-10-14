@@ -1,9 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Domain.Models.Cart;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
 using Ecommerce.Service.businessServices.CartServices;
-using Ecommerce.Shared.DTOs.CartDto_s;
+using Ecommerce.Shared.DTOs.Cart;
 using FluentAssertions;
 using Moq;
 
@@ -26,7 +26,7 @@ namespace GourmetHub.Tests.Services
             _sut = new CartService(_cartRepoMock.Object, _mapperMock.Object);
         }
 
-        // ─── GetCartAsync ────────────────────────────────────────────────
+        // --- GetCartAsync ------------------------------------------------
 
         [Fact]
         public async Task GetCartAsync_WhenCartExists_ReturnsMappedCartDto()
@@ -54,7 +54,7 @@ namespace GourmetHub.Tests.Services
             await act.Should().ThrowAsync<CartNotFound>();
         }
 
-        // ─── DeleteCartAsync ─────────────────────────────────────────────
+        // --- DeleteCartAsync ---------------------------------------------
 
         [Fact]
         public async Task DeleteCartAsync_WhenSuccessful_ReturnsTrue()

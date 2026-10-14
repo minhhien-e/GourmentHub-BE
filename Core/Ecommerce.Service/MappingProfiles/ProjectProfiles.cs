@@ -1,12 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Domain.Models.Cart;
 using Ecommerce.Domain.Models.Identity;
 using Ecommerce.Domain.Models.Orders;
 using Ecommerce.Domain.Models.Products;
-using Ecommerce.Shared.DTOs.CartDto_s;
-using Ecommerce.Shared.DTOs.IdentityDto_s;
-using Ecommerce.Shared.DTOs.OrderDto_s;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Cart;
+using Ecommerce.Shared.DTOs.Identity;
+using Ecommerce.Shared.DTOs.Orders;
+using Ecommerce.Shared.DTOs.Products;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;

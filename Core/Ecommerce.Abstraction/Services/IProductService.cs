@@ -1,7 +1,7 @@
-﻿using Ecommerce.Shared.Common;
+using Ecommerce.Shared.Common;
 using Ecommerce.Shared.Common.Pagination_Result;
 using Ecommerce.Shared.Common.Specification_Pattern_Enhancment;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿using Ecommerce.Abstraction.Services;
+using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
 using Ecommerce.Domain.Models.Contracts.Repository;
 using Ecommerce.Domain.Models.Contracts.Seed;
@@ -30,19 +30,19 @@ namespace ECommerce.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ─── MVC & API Explorer ──────────────────────────────────────
+            // --- MVC & API Explorer --------------------------------------
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // ─── Redis ───────────────────────────────────────────────────
+            // --- Redis ---------------------------------------------------
             builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
                 ConnectionMultiplexer.Connect(
                     builder.Configuration.GetConnectionString("RedisConnection")!
                 )
             );
 
-            // ─── Database Contexts ────────────────────────────────────────
+            // --- Database Contexts ----------------------------------------
             builder.Services.AddDbContext<StoreIdntityDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"))
             );
@@ -51,20 +51,20 @@ namespace ECommerce.Web
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
             );
 
-            // ─── Application Services ─────────────────────────────────────
+            // --- Application Services -------------------------------------
             builder.Services.AddScoped<IdataSeed, DataSeeeding>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddAutoMapper(m =>
                 m.AddProfile(new ProjectProfiles(builder.Configuration))
             );
-            builder.Services.AddScoped<IServiceManger, ServiceManger>();
+            builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
-            // ─── Repositories & Cache ─────────────────────────────────────
+            // --- Repositories & Cache -------------------------------------
             builder.Services.AddScoped<ICartRepo, CartRepo>();
             builder.Services.AddScoped<ICacheRepo, CacheRepo>();
             builder.Services.AddScoped<ICacheService, CacheService>();
 
-            // ─── Validation Error Response ────────────────────────────────
+            // --- Validation Error Response --------------------------------
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
@@ -81,11 +81,11 @@ namespace ECommerce.Web
                 };
             });
 
-            // ─── Identity ─────────────────────────────────────────────────
+            // --- Identity -------------------------------------------------
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<StoreIdntityDbContext>();
 
-            // ─── Authentication (JWT + Google OAuth) ──────────────────────
+            // --- Authentication (JWT + Google OAuth) ----------------------
             builder.Services.AddAuthentication(config =>
             {
                 config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -123,22 +123,22 @@ namespace ECommerce.Web
 
             var app = builder.Build();
 
-            // ─── Forwarded Headers (reverse proxy / MonsterASP) ───────────
+            // --- Forwarded Headers (reverse proxy / MonsterASP) -----------
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
 
-            // ─── Database Seeding ─────────────────────────────────────────
+            // --- Database Seeding -----------------------------------------
             await SeedDatabase(app);
 
-            // ─── Swagger ──────────────────────────────────────────────────
+            // --- Swagger --------------------------------------------------
             app.UseSwagger();
             app.UseSwaggerUI(c =>
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "GourmetHub API v1")
             );
 
-            // ─── Middleware Pipeline ──────────────────────────────────────
+            // --- Middleware Pipeline --------------------------------------
             app.UseMiddleware<CustomExceptionMiddleWare>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();

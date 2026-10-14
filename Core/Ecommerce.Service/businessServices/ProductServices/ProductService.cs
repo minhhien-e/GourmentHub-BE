@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Domain.Models.Contracts.UOW;
@@ -6,7 +6,7 @@ using Ecommerce.Domain.Models.Products;
 using Ecommerce.Service.Specifications;
 using Ecommerce.Shared.Common.Pagination_Result;
 using Ecommerce.Shared.Common.Specification_Pattern_Enhancment;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Products;
 
 namespace Ecommerce.Service.businessServices.ProductServices
 {

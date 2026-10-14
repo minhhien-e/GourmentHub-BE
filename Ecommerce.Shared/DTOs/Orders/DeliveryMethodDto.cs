@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ecommerce.Shared.DTOs.OrderDto_s
+namespace Ecommerce.Shared.DTOs.Orders
 {
     public class DeliveryMethodDto
     {

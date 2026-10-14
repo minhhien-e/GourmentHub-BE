@@ -1,8 +1,8 @@
-﻿using Ecommerce.Abstraction.Services;
+using Ecommerce.Abstraction.Services;
 using Ecommerce.Presentation.Attributes;
 using Ecommerce.Shared.Common.Pagination_Result;
 using Ecommerce.Shared.Common.Specification_Pattern_Enhancment;
-using Ecommerce.Shared.DTOs.ProductDro_s;
+using Ecommerce.Shared.DTOs.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace Ecommerce.Presentation.Controllers
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
-    public class ProductController(IServiceManger manager) : ControllerBase
+    public class ProductController(IServiceManager manager) : ControllerBase
     {
         [HttpGet]
         [Cache(4200)]

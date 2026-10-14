@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ecommerce.Abstraction.Services;
 using Ecommerce.Domain.Exceptions;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
@@ -6,12 +6,12 @@ using Ecommerce.Domain.Models.Contracts.UOW;
 using Ecommerce.Domain.Models.Orders;
 using Ecommerce.Domain.Models.Products;
 using Ecommerce.Service.Specifications;
-using Ecommerce.Shared.DTOs.IdentityDto_s;
-using Ecommerce.Shared.DTOs.OrderDto_s;
+using Ecommerce.Shared.DTOs.Identity;
+using Ecommerce.Shared.DTOs.Orders;
 
-namespace Ecommerce.Service.businessServices.OrderSevices
+namespace Ecommerce.Service.businessServices.OrderServices
 {
-    public class OrderSevice(IMapper mapper, ICartRepo cartRepo, IUnitOfWork unitOfWork) : IOrderService
+    public class OrderService(IMapper mapper, ICartRepo cartRepo, IUnitOfWork unitOfWork) : IOrderService
     {
         public async Task<OrderToReturnDto> CreateOrderAsync(OrderDto orderDto, string email)
         {
