@@ -1,0 +1,18 @@
+﻿@model ProductBrand
+
+<form method="post" asp-action="Create" class="brand-form">
+    <div class="input-group-modern">
+        <div class="input-wrapper">
+            <i class="fas fa-tag input-icon"></i>
+            <input asp-for="Name"
+                   class="form-control form-control-modern"
+                   placeholder="Enter brand name (e.g., Nike, Apple, Samsung)"
+                   required />
+        </div>
+        <button type="submit" class="btn btn-add-brand">
+            <i class="fas fa-plus me-2"></i>Add Brand
+        </button>
+    </div>
+    <span asp-validation-for="Name" class="text-danger validation-message"></span>
+</form>
+
