@@ -5,55 +5,51 @@ using Microsoft.Extensions.Logging;
 
 namespace ECommerce.Web.Custom_MiddleWares
 {
-    public class CustomExceptionMiddleWare
+    /// <summary>
+    /// Global exception handler middleware.
+    /// Maps domain exceptions to appropriate HTTP status codes
+    /// and returns a consistent JSON error envelope.
+    /// </summary>
+    public class CustomExceptionMiddleWare(RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-
-        public CustomExceptionMiddleWare(RequestDelegate next)
-        {
-            _next = next;
-        }
-
         public async Task Invoke(HttpContext context, ILogger<CustomExceptionMiddleWare> logger)
         {
             try
             {
-                await _next.Invoke(context);
+                await next(context);
+
                 if (context.Response.StatusCode == StatusCodes.Status404NotFound)
                 {
-                    var response = new ErrorToReturn()
+                    var notFoundResponse = new ErrorToReturn
                     {
                         statusCode = StatusCodes.Status404NotFound,
-                        Message = $"Endpoint {context.Request.Path} was not found"
+                        Message    = $"Endpoint '{context.Request.Path}' was not found."
                     };
-                    await context.Response.WriteAsJsonAsync(response);
+                    await context.Response.WriteAsJsonAsync(notFoundResponse);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "{Message}", ex.Message);
+                logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
 
-                var response = new ErrorToReturn()
-                {
-                    Message = ex.Message
-                };
+                var errorResponse = new ErrorToReturn { Message = ex.Message };
 
                 context.Response.StatusCode = ex switch
                 {
-                    NotFoundException => StatusCodes.Status404NotFound,
-                    UnAuthorizedException => StatusCodes.Status401Unauthorized,
-                    BadRequestException badRequest => GetBadRequestErrors(badRequest, response),
-                    _ => StatusCodes.Status500InternalServerError
+                    NotFoundException       => StatusCodes.Status404NotFound,
+                    UnAuthorizedException   => StatusCodes.Status401Unauthorized,
+                    BadRequestException bre => ResolveBadRequest(bre, errorResponse),
+                    _                       => StatusCodes.Status500InternalServerError
                 };
 
-                response.statusCode = context.Response.StatusCode;
+                errorResponse.statusCode   = context.Response.StatusCode;
                 context.Response.ContentType = "application/json";
 
-                await context.Response.WriteAsJsonAsync(response);
+                await context.Response.WriteAsJsonAsync(errorResponse);
             }
         }
 
-        private static int GetBadRequestErrors(BadRequestException exception, ErrorToReturn response)
+        private static int ResolveBadRequest(BadRequestException exception, ErrorToReturn response)
         {
             response.Errors = exception.Errors;
             return StatusCodes.Status400BadRequest;

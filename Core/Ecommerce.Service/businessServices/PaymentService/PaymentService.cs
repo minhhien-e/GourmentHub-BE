@@ -5,66 +5,65 @@ using Ecommerce.Domain.Models.Cart;
 using Ecommerce.Domain.Models.Contracts.RedisInMemoryRepository;
 using Ecommerce.Domain.Models.Contracts.UOW;
 using Ecommerce.Domain.Models.Orders;
-using Ecommerce.Domain.Models.Products;
 using Ecommerce.Shared.DTOs.CartDto_s;
 using Microsoft.Extensions.Configuration;
 using Stripe;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Product = Ecommerce.Domain.Models.Products.Product;
 
 namespace Ecommerce.Service.businessServices.PaymentService
 {
-    public class PaymentService(IConfiguration configuration, ICartRepo cartRepo, IUnitOfWork unitOfWork ,IMapper mapper) : IPaymentService
+    public class PaymentService(
+        IConfiguration configuration,
+        ICartRepo cartRepo,
+        IUnitOfWork unitOfWork,
+        IMapper mapper) : IPaymentService
     {
-        public async Task<CartDto> CreateOrUpdatePaymentIntentAsync(string CartId)
+        public async Task<CartDto> CreateOrUpdatePaymentIntentAsync(string cartId)
         {
-            //conigure stripe First :Package
             StripeConfiguration.ApiKey = configuration["StripeSettings:secretKey"];
-            //get Cart by id 
-            var Cart = await cartRepo.GetCartAsync(CartId) ?? throw new CartNotFound(CartId);
-            //get amount of products + Delivery method cost 
-            //we need the product repo just to get the items in the cart with their ids 
-            var ProductRepo = unitOfWork.GetRepository<Domain.Models.Products.Product, int>();
-            //collection of cart items 
-            foreach (var item in Cart.Items)
+
+            var cart = await cartRepo.GetCartAsync(cartId)
+                ?? throw new CartNotFound(cartId);
+
+            // Refresh item prices from the database to prevent client-side tampering
+            var productRepo = unitOfWork.GetRepository<Product, int>();
+            foreach (var item in cart.Items)
             {
-                var product = await ProductRepo.GetByIdAsync(item.Id) ?? throw new ProductNotFound(item.Id);
+                var product = await productRepo.GetByIdAsync(item.Id)
+                    ?? throw new ProductNotFound(item.Id);
                 item.Price = product.Price;
             }
-            var DM = await unitOfWork.GetRepository<DeliveryMethod, int>().GetByIdAsync(Cart.DeliveryMethodId.Value) ?? throw new DeliveryMethodNotFound(Cart.DeliveryMethodId.Value);
-            Cart.ShippingPrice = DM.Price;
-            var CartAmount = (long)(Cart.Items.Sum(p => p.Quantity * p.Price) + DM.Price) * 100;
-            //create intent [create - update]
-            var paymentService = new PaymentIntentService();
 
-            if (Cart.PaymentIntentId is null)
+            var deliveryMethod = await unitOfWork.GetRepository<DeliveryMethod, int>()
+                .GetByIdAsync(cart.DeliveryMethodId!.Value)
+                ?? throw new DeliveryMethodNotFound(cart.DeliveryMethodId.Value);
+
+            cart.ShippingPrice = deliveryMethod.Price;
+
+            var amountInCents = (long)(cart.Items.Sum(i => i.Quantity * i.Price) + deliveryMethod.Price) * 100;
+
+            var intentService = new PaymentIntentService();
+
+            if (cart.PaymentIntentId is null)
             {
-                var options = new PaymentIntentCreateOptions()
+                var createOptions = new PaymentIntentCreateOptions
                 {
-                    Amount = CartAmount,
-                    Currency = "USD",
+                    Amount             = amountInCents,
+                    Currency           = "usd",
                     PaymentMethodTypes = ["card"]
                 };
-
-                var PaymentIntent = await paymentService.CreateAsync(options);
-
-                Cart.PaymentIntentId = PaymentIntent.Id;
-                Cart.ClientSecret = PaymentIntent.ClientSecret;
+                var intent         = await intentService.CreateAsync(createOptions);
+                cart.PaymentIntentId = intent.Id;
+                cart.ClientSecret    = intent.ClientSecret;
             }
             else
             {
-                var Options = new PaymentIntentUpdateOptions()
-                {
-                    Amount = CartAmount
-                };
-                await paymentService.UpdateAsync(Cart.PaymentIntentId, Options);
+                var updateOptions = new PaymentIntentUpdateOptions { Amount = amountInCents };
+                await intentService.UpdateAsync(cart.PaymentIntentId, updateOptions);
             }
-            await cartRepo.CreateUpdateCartAsync(Cart);
-            return mapper.Map<UserCart, CartDto>(Cart);
 
+            await cartRepo.CreateUpdateCartAsync(cart);
+            return mapper.Map<UserCart, CartDto>(cart);
         }
     }
 }

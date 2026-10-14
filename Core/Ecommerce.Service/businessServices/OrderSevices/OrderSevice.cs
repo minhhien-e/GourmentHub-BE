@@ -8,10 +8,6 @@ using Ecommerce.Domain.Models.Products;
 using Ecommerce.Service.Specifications;
 using Ecommerce.Shared.DTOs.IdentityDto_s;
 using Ecommerce.Shared.DTOs.OrderDto_s;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Ecommerce.Service.businessServices.OrderSevices
 {
@@ -20,44 +16,45 @@ namespace Ecommerce.Service.businessServices.OrderSevices
         public async Task<OrderToReturnDto> CreateOrderAsync(OrderDto orderDto, string email)
         {
             var orderAddress = mapper.Map<AddressDto, OrderAddress>(orderDto.Address);
-            var cart = await cartRepo.GetCartAsync(orderDto.CartId) ?? throw new CartNotFound(orderDto.CartId);
+            var cart         = await cartRepo.GetCartAsync(orderDto.CartId)
+                ?? throw new CartNotFound(orderDto.CartId);
 
             ArgumentNullException.ThrowIfNullOrEmpty(cart.PaymentIntentId);
 
-            var orderRepo = unitOfWork.GetRepository<Order, Guid>();
-            var spec = new OrderIntentCheck(cart.PaymentIntentId);
-            var existingOrder = await orderRepo.GetByIdWithSpecificationsAync(spec);
-
+            // If an order already exists for this payment intent, remove it before creating a new one
+            var orderRepo     = unitOfWork.GetRepository<Order, Guid>();
+            var existingOrder = await orderRepo.GetByIdWithSpecificationsAync(new OrderIntentCheck(cart.PaymentIntentId));
             if (existingOrder is not null)
-            {
                 orderRepo.delete(existingOrder);
-            }
 
-            var orderItems = new List<OrderItem>();
+            // Build order items from cart
             var productRepo = unitOfWork.GetRepository<Product, int>();
+            var orderItems  = new List<OrderItem>();
 
             foreach (var item in cart.Items)
             {
-                var product = await productRepo.GetByIdAsync(item.Id) ?? throw new ProductNotFound(item.Id);
-                var orderItem = new OrderItem
+                var product = await productRepo.GetByIdAsync(item.Id)
+                    ?? throw new ProductNotFound(item.Id);
+
+                orderItems.Add(new OrderItem
                 {
                     Product = new ItemTobeOrderd
                     {
-                        ProductId = item.Id,
+                        ProductId    = item.Id,
                         ProductImgUrl = product.PictureUrl,
-                        ProductName = item.Name,
+                        ProductName  = item.Name
                     },
                     Quantity = item.Quantity,
-                    Price = product.Price
-                };
-                orderItems.Add(orderItem);
+                    Price    = product.Price
+                });
             }
 
-            var deliveryMethod = await unitOfWork.GetRepository<DeliveryMethod, int>().GetByIdAsync(orderDto.DeliveryMethodId) 
+            var deliveryMethod = await unitOfWork.GetRepository<DeliveryMethod, int>()
+                .GetByIdAsync(orderDto.DeliveryMethodId)
                 ?? throw new DeliveryMethodNotFound(orderDto.DeliveryMethodId);
 
-            var subTotal = orderItems.Sum(p => p.Price * p.Quantity);
-            var order = new Order(email, orderAddress, deliveryMethod, orderItems, subTotal, cart.PaymentIntentId);
+            var subTotal = orderItems.Sum(i => i.Price * i.Quantity);
+            var order    = new Order(email, orderAddress, deliveryMethod, orderItems, subTotal, cart.PaymentIntentId);
 
             unitOfWork.GetRepository<Order, Guid>().add(order);
             await unitOfWork.SaveChangesAsync();
@@ -67,15 +64,17 @@ namespace Ecommerce.Service.businessServices.OrderSevices
 
         public async Task<IEnumerable<OrderToReturnDto>> GetAllOrdersAsync(string email)
         {
-            var spec = new OrderSpecifications(email);
-            var orders = await unitOfWork.GetRepository<Order, Guid>().GetAllWithSpecificatonsAsync(spec);
+            var orders = await unitOfWork.GetRepository<Order, Guid>()
+                .GetAllWithSpecificatonsAsync(new OrderSpecifications(email));
+
             return mapper.Map<IEnumerable<Order>, IEnumerable<OrderToReturnDto>>(orders);
         }
 
         public async Task<OrderToReturnDto> GetOrderById(Guid orderId)
         {
-            var spec = new OrderSpecifications(orderId);
-            var order = await unitOfWork.GetRepository<Order, Guid>().GetByIdWithSpecificationsAync(spec);
+            var order = await unitOfWork.GetRepository<Order, Guid>()
+                .GetByIdWithSpecificationsAync(new OrderSpecifications(orderId));
+
             return mapper.Map<Order, OrderToReturnDto>(order);
         }
 

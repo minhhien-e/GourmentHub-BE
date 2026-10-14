@@ -1,42 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Ecommerce.Domain.Models.Contracts.Specifications
 {
-    public interface ISpecification <TEntity,Tkey> where TEntity : BaseEntity<Tkey>
+    public interface ISpecification<TEntity, TKey> where TEntity : BaseEntity<TKey>
     {
-        //store the different parts of the query
-
-
-        Expression<Func<TEntity,bool>> Criteria { get; /* no set here for making it abstract  */ } //where condition
-
-
-        //stores the include expressions 
-        //list of expressions 3shan a3ml include l kol el related entities eli 3ayzha
-        //3shan bt3tmd 3 el relationships ben el entities
-        List<Expression<Func<TEntity,object>>> Includes { get; } //includes bta3et el barnd w el type 
-
-
-
-
-        Expression<Func<TEntity, object>> OrderBy { get; } // order by Ascending 
-
-        Expression<Func<TEntity, object>> OrderByDesc { get; } // order by Descending
-
-
-        //pagination 
-
-        int take { get; } //bya5do el rakm el ana mhtago 
-        int skip { get; } //bya5do el rakm el ana mhtago 
-
-        bool isPaginable { get; set; } //da el hy2oly amla wla la 
-        //3shan y7dd emta hahtago 
-
-
-
+        Expression<Func<TEntity, bool>>       Criteria      { get; }
+        List<Expression<Func<TEntity, object>>> Includes    { get; }
+        Expression<Func<TEntity, object>>     OrderBy       { get; }
+        Expression<Func<TEntity, object>>     OrderByDesc   { get; }
+        int  take         { get; }
+        int  skip         { get; }
+        bool isPaginable  { get; set; }
     }
 }
