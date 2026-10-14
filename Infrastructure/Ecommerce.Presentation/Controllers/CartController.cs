@@ -3,41 +3,35 @@ using Ecommerce.Presentation.Attributes;
 using Ecommerce.Shared.DTOs.CartDto_s;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Ecommerce.Presentation.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/[Controller]")] //routing el endpoint
-    public class CartController(IServiceManger manger) : ControllerBase
+    [Route("api/[controller]")]
+    public class CartController(IServiceManger manager) : ControllerBase
     {
-
         [HttpGet]
         [Cache(100000)]
-        public async Task<ActionResult<CartDto>> GetCart( string Key)
+        public async Task<ActionResult<CartDto>> GetCart([FromQuery] string key)
         {
-            var Cart = await manger.CartService.GetCartAsync(Key);
-            return Ok(Cart);
+            var cart = await manager.CartService.GetCartAsync(key);
+            return Ok(cart);
         }
+
         [HttpPost]
-        public async Task<ActionResult<CartDto>> CraetUpdateCart(CartDto cart)
+        public async Task<ActionResult<CartDto>> CreateOrUpdateCart([FromBody] CartDto cart)
         {
-            var CartTobeSaved = await manger.CartService.CreateUpdateCartAsync(cart);
-            return Ok(CartTobeSaved);
-        }
-        [HttpDelete("{Key}")]
-        public async Task<ActionResult<bool>> DeleteCart( string Key)
-        {
-
-            var data = await manger.CartService.DeleteCartAsync(Key);
-            return Ok(data);
+            var savedCart = await manager.CartService.CreateUpdateCartAsync(cart);
+            return Ok(savedCart);
         }
 
-
+        [HttpDelete("{key}")]
+        public async Task<ActionResult<bool>> DeleteCart(string key)
+        {
+            var result = await manager.CartService.DeleteCartAsync(key);
+            return Ok(result);
+        }
     }
 }

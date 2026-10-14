@@ -2,26 +2,20 @@
 using Ecommerce.Shared.DTOs.CartDto_s;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Ecommerce.Presentation.Controllers
 {
     [ApiController]
-  
-    [Route("api/[Controller]")] //routing el endpoint
-    public class PaymentController(IServiceManger manger):ControllerBase
+    [Route("api/[controller]")]
+    public class PaymentController(IServiceManger manager) : ControllerBase
     {
         [Authorize]
-        [HttpPost("{CartId}")]
-        public async Task<ActionResult<CartDto>> CreateOrUpdatePAymentIntent(string CartId) //come from token 
+        [HttpPost("{cartId}")]
+        public async Task<ActionResult<CartDto>> CreateOrUpdatePaymentIntent(string cartId)
         {
-            var Cart = await manger.PaymentService.CreateOrUpdatePaymentIntentAsync(CartId);
-            return Ok(Cart);
+            var cart = await manager.PaymentService.CreateOrUpdatePaymentIntentAsync(cartId);
+            return Ok(cart);
         }
     }
 }

@@ -3,51 +3,45 @@ using Ecommerce.Presentation.Attributes;
 using Ecommerce.Shared.DTOs.OrderDto_s;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ecommerce.Presentation.Controllers
 {
     [ApiController]
     [Authorize]
-    [Route("api/[Controller]")]
-    public class OrderController(IServiceManger manger):ControllerBase
+    [Route("api/[controller]")]
+    public class OrderController(IServiceManger manager) : ControllerBase
     {
         [HttpPost]
-        public async Task<ActionResult<OrderToReturnDto>> CreateOrder(OrderDto orderDto)
+        public async Task<ActionResult<OrderToReturnDto>> CreateOrder([FromBody] OrderDto orderDto)
         {
-
-            var emailFromToken = User.FindFirstValue(ClaimTypes.Email);
-
-            var Order = await manger.OrderService.CreateOrderAsync(orderDto, emailFromToken);
-
-            return Ok(Order);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var order = await manager.OrderService.CreateOrderAsync(orderDto, email);
+            return Ok(order);
         }
-        [HttpGet("DeliveryMethods")]
-        public async Task<ActionResult <IEnumerable<DeliveryMethodDto>>> GetDeliveryMethods() 
+
+        [HttpGet("delivery-methods")]
+        public async Task<ActionResult<IEnumerable<DeliveryMethodDto>>> GetDeliveryMethods()
         {
-            var DMs = await manger.OrderService.GetDeliveryMethodsAsync();
-            return Ok(DMs);
+            var deliveryMethods = await manager.OrderService.GetDeliveryMethodsAsync();
+            return Ok(deliveryMethods);
         }
-        [HttpGet("AllOrders")]
+
+        [HttpGet("my-orders")]
         [Cache(4200)]
         public async Task<ActionResult<IEnumerable<OrderToReturnDto>>> GetAllOrders()
         {
-            var Email = User.FindFirstValue (ClaimTypes.Email);
-            var Orders = await manger.OrderService.GetAllOrdersAsync(Email);
-            return Ok(Orders);
-        }
-        [HttpGet]
-        [Cache(1000)]
-        public async Task<ActionResult<OrderToReturnDto>> GetOrderById(Guid Orderid)
-        {
-            var Order = await manger.OrderService.GetOrderById(Orderid);
-            return Ok(Order);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var orders = await manager.OrderService.GetAllOrdersAsync(email);
+            return Ok(orders);
         }
 
+        [HttpGet("{id:guid}")]
+        [Cache(1000)]
+        public async Task<ActionResult<OrderToReturnDto>> GetOrderById(Guid id)
+        {
+            var order = await manager.OrderService.GetOrderById(id);
+            return Ok(order);
+        }
     }
 }
