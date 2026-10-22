@@ -28,31 +28,45 @@ namespace Ecommerce.Presentation.Controllers
             Stripe.Event stripeEvent;
             try
             {
+                // Bắt buộc xác thực chữ ký nếu webhookSecret được thiết lập trong cấu hình
                 if (!string.IsNullOrEmpty(webhookSecret))
                 {
                     stripeEvent = Stripe.EventUtility.ConstructEvent(json, stripeSignature, webhookSecret);
                 }
                 else
                 {
+                    // Chế độ dev / fallback kiểm thử
                     stripeEvent = Stripe.EventUtility.ParseEvent(json);
                 }
             }
             catch (Exception)
             {
-                return BadRequest();
+                // Chữ ký không hợp lệ -> từ chối ngay lập tức
+                return BadRequest("Invalid Stripe signature or payload.");
+            }
+
+            var db = redis.GetDatabase();
+
+            // 1. Chống trùng lặp Event (Event Idempotency):
+            // Lưu event.Id trong 24 giờ. Nếu Stripe gửi lại cùng một event, lập tức trả về Ok() mà không xử lý lại
+            var eventKey = $"webhook:event:{stripeEvent.Id}";
+            var isNewEvent = await db.StringSetAsync(eventKey, "processed", TimeSpan.FromHours(24), StackExchange.Redis.When.NotExists);
+            if (!isNewEvent)
+            {
+                return Ok();
             }
 
             if (stripeEvent.Data.Object is Stripe.PaymentIntent intent)
             {
                 var lockKey = $"lock:payment:{intent.Id}";
-                var db = redis.GetDatabase();
 
-                // Distributed Lock qua Redis để tránh trùng lặp giữa Webhook và Background Job
+                // 2. Distributed Lock qua Redis: tránh race condition giữa Webhook và Background Job
                 var acquired = await db.StringSetAsync(lockKey, "locked", TimeSpan.FromSeconds(30), StackExchange.Redis.When.NotExists);
                 if (!acquired)
                 {
-                    // Đang có tiến trình khác xử lý intent này, trả về Ok để Stripe không retry dồn dập
-                    return Ok();
+                    // Nếu đang có tiến trình xử lý intent này, hoàn tác eventKey để Stripe có thể retry hoặc trả Ok
+                    await db.KeyDeleteAsync(eventKey);
+                    return StatusCode(429); // Đang xử lý bận, để Stripe retry sau
                 }
 
                 try
