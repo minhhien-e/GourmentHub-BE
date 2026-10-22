@@ -10,5 +10,6 @@ namespace Ecommerce.Abstraction.Services
     public interface IPaymentService
     {
         Task<CartDto> CreateOrUpdatePaymentIntentAsync(string CartId);
+        Task<bool> UpdatePaymentStatusAsync(string paymentIntentId, bool isSuccess);
     }
 }

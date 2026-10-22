@@ -65,5 +65,23 @@ namespace Ecommerce.Service.businessServices.PaymentService
             await cartRepo.CreateUpdateCartAsync(cart);
             return mapper.Map<UserCart, CartDto>(cart);
         }
+
+        public async Task<bool> UpdatePaymentStatusAsync(string paymentIntentId, bool isSuccess)
+        {
+            var orderRepo = unitOfWork.GetRepository<Order, Guid>();
+            var order = await orderRepo.GetByIdWithSpecificationsAync(new Ecommerce.Service.Specifications.OrderIntentCheck(paymentIntentId));
+
+            if (order is null)
+                return false;
+
+            // Chống trùng lặp (Idempotency): Nếu đơn hàng không còn ở trạng thái pending thì không xử lý lại
+            if (order.Status != OrderStatus.pending)
+                return true;
+
+            order.Status = isSuccess ? OrderStatus.PaymentReceived : OrderStatus.PaymentFailed;
+            orderRepo.update(order);
+            await unitOfWork.SaveChangesAsync();
+            return true;
+        }
     }
 }

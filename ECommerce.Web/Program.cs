@@ -64,6 +64,9 @@ namespace ECommerce.Web
             builder.Services.AddScoped<ICacheRepo, CacheRepo>();
             builder.Services.AddScoped<ICacheService, CacheService>();
 
+            // --- Background Jobs ------------------------------------------
+            builder.Services.AddHostedService<ECommerce.Web.BackgroundJobs.PaymentSyncBackgroundService>();
+
             // --- Validation Error Response --------------------------------
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
